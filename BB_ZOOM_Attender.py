@@ -149,8 +149,8 @@ if __name__ == '__main__':
 
                     timewait = 0
                     while(True):
-                        timewait += 1
-                        time.sleep(1)
+                        timewait += 10
+                        time.sleep(10)
 
                         if not "Zoom.exe" in (p.name() for p in psutil.process_iter()):
                             break
@@ -166,7 +166,8 @@ if __name__ == '__main__':
                     logger.info(f"Attended {classJoinName} Lecture for: {timewaitmins} minutes")
                 else:
 
-                    driver.get("https://cuchd.blackboard.com/")
+                    driver.get("https://cuchd.blackboard.com/ultra/course")
+                    time.sleep(2)
                     currentURL = str(driver.current_url)
 
 
@@ -213,7 +214,6 @@ if __name__ == '__main__':
                         logger.error("Class Joining Link for " + classJoinName + " Lecture Not Found !!!")
                         classtojoin = False
 
-                driver.minimize_window()
 
             else:
                 logger.critical(f"You missed lecture for: {classJoinName}")
