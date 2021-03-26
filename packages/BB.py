@@ -267,6 +267,7 @@ class ClassManagement():
                     # finding class joining button
                     for tag in soup.findAll("a",{"role":"menuitem"}):
                         span_text = (str(tag.text))[1:-1]
+                        
                         if (str(span_text)!=str('Course Room')) and ('Visible to students' not in span_text) and ('Hidden from students' not in span_text):
                             classes_avaliable.append(span_text)
                             classlinkfound = True
@@ -406,17 +407,28 @@ class JoinOnlineClass(Thread):
                             timeSpentInWait+=2
 
 
+            moderator_flag = False
             # Checking if Moderator removed you form class
-            try:
-                self.driver.find_element_by_xpath("//h1[text()='A moderator removed you']")
-                logger.warning("Moderator removed you form class.")
+            while(True):
+                if not LOCK:
+                    LOCK = True
+                    self.driver.switch_to.window(self.tabId)
+                    try:
+                        self.driver.find_element_by_xpath("//h1[text()='A moderator removed you']")
+                        logger.warning("Moderator removed you form class.")
+                        moderator_flag = True
+                        break
+                    except:
+                        pass
+                    LOCK = False
+                    break
+            
+            if moderator_flag:
                 break
-            except:
-                pass
 
 
-            time.sleep(1)
-            timeElapsed += 1
+            time.sleep(10)
+            timeElapsed += 10
             timeElapsedmins = timeElapsed // 60
             timeElapsedsecs = timeElapsed % 60
             print(f"Attending {self.lectureName} Lecture for: {timeElapsedmins}:{timeElapsedsecs} minutes", end="\r")
@@ -428,6 +440,7 @@ class JoinOnlineClass(Thread):
                 LOCK = True
                 self.driver.switch_to.window(self.tabId)
                 self.driver.close()
+                self.driver.switch_to.window(self.defaultTabId)
                 LOCK = False
                 break
             else:
@@ -438,3 +451,4 @@ class JoinOnlineClass(Thread):
         # converting total class joined seconds to minutes
         total_class_time_min = (timeElapsed-timeSpentInWait) /60
         logger.warning("Attended " + self.lectureName + " Lecture for: " + str(total_class_time_min) + " minutes")
+        self.driver.minimize_window()
