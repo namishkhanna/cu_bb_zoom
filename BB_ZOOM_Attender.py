@@ -16,7 +16,7 @@ global USERDATAFILENAME, TIMETABLE, CHROMEPATH
 
 
 
-CURRENT_VERSION = "v1.0"
+CURRENT_VERSION = "v2.0"
 USERDATAFILENAME = "userData.txt"
 TIMETABLE = "rptStudentTimeTable.csv"
 temp = str(os.path.normpath("\\AppData\\yal\\Google\\Chrome\\User Data\\Default"))
@@ -108,7 +108,7 @@ if __name__ == '__main__':
                     mins, secs = divmod(timeTowait, 60)
                     hrs, mins = divmod(mins,60)
                     timer = '{:02d}:{:02d}:{:02d}'.format(int(hrs), int(mins), int(secs)) 
-                    print(f"Time remaining for the class: [{nextClassTemp}]:\t",timer, end="\r") 
+                    print(f"Time remaining for the class: [{nextClassTemp}]:\t", timer, end="\r") 
                     time.sleep(1) 
                     timeTowait -= 1
                 print()
@@ -128,8 +128,12 @@ if __name__ == '__main__':
                     zoomlink = allDetails[index][2]
                     if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
                         os.system("taskkill /im Zoom.exe /f")
-
-                    driver.get(zoomlink)
+                    try:
+                        driver.get(zoomlink)
+                    except:
+                        logger.error("Invalid Zoom Link !!!")
+                        input()
+                        exit()
                     time_to_sleep = 0
 
                     while(True):
@@ -138,13 +142,28 @@ if __name__ == '__main__':
                         else:
                             time.sleep(1)
                             time_to_sleep += 1
+
                     logger.info(f"Attending {classJoinName} Lecture on Zoom...")
                     driver.minimize_window()
                     total_time_sleep = 2700 - time_to_sleep
-                    total_time_sleep_mins = total_time_sleep/60
-                    time.sleep(total_time_sleep)
+
+                    timewait = 0
+                    while(True):
+                        timewait += 1
+                        time.sleep(1)
+
+                        if not "Zoom.exe" in (p.name() for p in psutil.process_iter()):
+                            break
+                        if timewait>total_time_sleep:
+                            break
+                        
+                        mins =  timewait // 60
+                        secs = timewait % 60
+                        print(f"Attending {classJoinName} Lecture for: {mins}:{secs} minutes", end="\r")
+
+                    timewaitmins = timewait/60
                     os.system("taskkill /im Zoom.exe /f")
-                    logger.info(f"Attended {classJoinName} Lecture for {total_time_sleep_mins}minutes")
+                    logger.info(f"Attended {classJoinName} Lecture for: {timewaitmins} minutes")
                 else:
 
                     driver.get("https://cuchd.blackboard.com/")
@@ -185,8 +204,8 @@ if __name__ == '__main__':
                                 
                         joinClassOBJ = JoinOnlineClass(driver.window_handles[-1],driver.window_handles[0],driver,classJoinName,nextClassJoinTime)
                         joinClassOBJ.start()
-                        logger.info("Waiting for all classes to end .....")
-                        joinClassOBJ.join()
+                        '''logger.info("Waiting for all classes to end .....")
+                        joinClassOBJ.join()'''
 
                 
                     # if time to attend lecture is gone and link is not available    
@@ -194,15 +213,11 @@ if __name__ == '__main__':
                         logger.error("Class Joining Link for " + classJoinName + " Lecture Not Found !!!")
                         classtojoin = False
 
-
-                    # check if time for class is gone or not
-                    elif not IsTimeToJoinClass:
-                        logger.critical(f"You missed lecture for: {classJoinName}")
-
                 driver.minimize_window()
 
             else:
                 logger.critical(f"You missed lecture for: {classJoinName}")
+                driver.minimize_window()
                      
 
         driver.quit()
