@@ -199,7 +199,6 @@ class ClassManagement():
         spanToBeOpened = ""
         linkNotAvailable = True
         timeRemainsForNextClass = True
-        print(nextClassJoinTime)
 
 
         while(linkNotAvailable and timeRemainsForNextClass):
@@ -416,8 +415,11 @@ class JoinOnlineClass(Thread):
                 pass
 
 
-            time.sleep(15)
-            timeElapsed+=15
+            time.sleep(1)
+            timeElapsed += 1
+            timeElapsedmins = timeElapsed // 60
+            timeElapsedsecs = timeElapsed % 60
+            print(f"Attending {self.lectureName} Lecture for: {timeElapsedmins}:{timeElapsedsecs} minutes", end="\r")
         
 
         # Switching to the class tab
