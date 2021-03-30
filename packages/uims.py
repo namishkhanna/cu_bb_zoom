@@ -302,6 +302,7 @@ class UimsManagement():
                 print("Enter Zoom Link: ")
                 link_input = input()
                 zoom_to_join[i].append(link_input)
+                print()
 
             # creating new csv with zoom links
             new_csv = []
