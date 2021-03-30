@@ -415,7 +415,7 @@ class JoinOnlineClass(Thread):
                     self.driver.switch_to.window(self.tabId)
                     try:
                         self.driver.find_element_by_xpath("//h1[text()='A moderator removed you']")
-                        logger.warning("Moderator removed you form class.")
+                        logger.warning("Moderator removed you from class.")
                         moderator_flag = True
                         break
                     except:
