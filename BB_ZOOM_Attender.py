@@ -16,7 +16,7 @@ global USERDATAFILENAME, TIMETABLE, CHROMEPATH
 
 
 
-CURRENT_VERSION = "v2.0"
+CURRENT_VERSION = "v3.0"
 USERDATAFILENAME = "userData.txt"
 TIMETABLE = "rptStudentTimeTable.csv"
 temp = str(os.path.normpath("\\AppData\\yal\\Google\\Chrome\\User Data\\Default"))
@@ -82,7 +82,35 @@ if __name__ == '__main__':
 
 
         IsLastClass = False
-        driveropened = False
+        logger.critical("Please Click on always ALLOW PERMISSION and then OPEN .....")
+        time.sleep(10)
+        driver = BbLoginOBJ.driver()
+
+        # finding if there is lab or not
+        for index in range(lecturesToAttend-1,len(allDetails)):
+        
+            if allDetails[index][2] != "None":
+
+                link_for_permission = allDetails[index][2]
+
+                if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
+                    os.system("taskkill /im Zoom.exe /f")
+                
+                driver.get(link_for_permission)
+
+                while(True):
+                    if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
+                        break
+                    else:
+                        time.sleep(1)
+                
+                os.system("taskkill /im Zoom.exe /f")
+                logger.critical("Permission Allowed")
+                break
+        
+        
+        driver.minimize_window()
+
 
         # Looping through all Lectures
         for index in range(lecturesToAttend-1,len(allDetails)):
@@ -92,11 +120,10 @@ if __name__ == '__main__':
             nextClassJoinTime = BbClassManagementOBJ.nextClassDetails(allDetails[index])
             total_class_time = 0
 
-
             currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
             if (currentTime<classJoinTime):
                 nextClassTemp = str(index+1) + ": " + allDetails[index][0] + " " + allDetails[index][1]
-                logger.info("Waiting for class ....")
+                logger.info("Waiting for class .....")
                 timeTowait = classJoinTime - currentTime
                 timeTowait = timeTowait.total_seconds()
 
@@ -107,16 +134,12 @@ if __name__ == '__main__':
                     timeTowait = timeTowait.total_seconds()
                     mins, secs = divmod(timeTowait, 60)
                     hrs, mins = divmod(mins,60)
-                    timer = '{:02d}:{:02d}:{:02d}'.format(int(hrs), int(mins), int(secs)) 
+                    timer = '{:02d}:{:02d}:{:02d}'.format(int(hrs), int(mins), int(secs))
                     print(f"Time remaining for the class: [{nextClassTemp}]:\t", timer, end="\r") 
                     time.sleep(1) 
                     timeTowait -= 1
                 print()
             
-
-            if not driveropened:
-                driver = BbLoginOBJ.driver()
-                driveropened = True
 
             driver.maximize_window()
 
@@ -134,18 +157,24 @@ if __name__ == '__main__':
                         logger.error("Invalid Zoom Link !!!")
                         input()
                         exit()
-                    time_to_sleep = 0
+
+                    try:
+                        WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="zoom-ui-frame"]/div[2]/div/div[1]/div'))).click()
+                    except:
+                        logger.error("Unable to Open Zoom Link !!!")
+                        input()
+                        exit()
 
                     while(True):
                         if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
                             break
                         else:
                             time.sleep(1)
-                            time_to_sleep += 1
+                    
 
                     logger.info(f"Attending {classJoinName} Lecture on Zoom...")
                     driver.minimize_window()
-                    total_time_sleep = 2700 - time_to_sleep
+                    total_time_sleep = 2400
 
                     timewait = 0
                     while(True):
@@ -155,6 +184,9 @@ if __name__ == '__main__':
                         if not "Zoom.exe" in (p.name() for p in psutil.process_iter()):
                             break
                         if timewait>total_time_sleep:
+                            break
+                        currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
+                        if (currentTime>nextClassJoinTime):
                             break
                         
                         mins =  timewait // 60
@@ -205,8 +237,22 @@ if __name__ == '__main__':
                                 
                         joinClassOBJ = JoinOnlineClass(driver.window_handles[-1],driver.window_handles[0],driver,classJoinName,nextClassJoinTime)
                         joinClassOBJ.start()
-                        '''logger.info("Waiting for all classes to end .....")
-                        joinClassOBJ.join()'''
+
+                        currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
+                        if (currentTime<nextClassJoinTime):
+                            nextClassTemp = str(index+1) + ": " + allDetails[index][0] + " " + allDetails[index][1]
+                            timeTowait = nextClassJoinTime - currentTime
+                            timeTowait = timeTowait.total_seconds()
+
+                            while (timeTowait>0):
+                                currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
+                                timeTowait = nextClassJoinTime - currentTime
+                                timeTowait = timeTowait.total_seconds()
+                                mins, secs = divmod(timeTowait, 60)
+                                hrs, mins = divmod(mins,60)
+                                timer = '{:02d}:{:02d}:{:02d}'.format(int(hrs), int(mins), int(secs))
+                                time.sleep(20) 
+                                timeTowait -= 20
 
                 
                     # if time to attend lecture is gone and link is not available    
