@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
                     logger.info(f"Attending {classJoinName} Lecture on Zoom...")
                     driver.minimize_window()
-                    total_time_sleep = 2400
+                    total_time_sleep = 2700
 
                     timewait = 0
                     while(True):
