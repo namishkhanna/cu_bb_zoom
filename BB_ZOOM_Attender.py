@@ -16,7 +16,7 @@ global USERDATAFILENAME, TIMETABLE, CHROMEPATH
 
 
 
-CURRENT_VERSION = "v3.0"
+CURRENT_VERSION = "v3.1"
 USERDATAFILENAME = "userData.txt"
 TIMETABLE = "rptStudentTimeTable.csv"
 temp = str(os.path.normpath("\\AppData\\yal\\Google\\Chrome\\User Data\\Default"))
@@ -82,10 +82,7 @@ if __name__ == '__main__':
 
 
         IsLastClass = False
-        logger.critical("Please Click on always ALLOW PERMISSION and then OPEN .....")
-        time.sleep(10)
-        driver = BbLoginOBJ.driver()
-
+        ISDriverOpen = False
         # finding if there is lab or not
         for index in range(lecturesToAttend-1,len(allDetails)):
         
@@ -96,6 +93,13 @@ if __name__ == '__main__':
                 if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
                     os.system("taskkill /im Zoom.exe /f")
                 
+                logger.critical("Please Click on always ALLOW PERMISSION and then OPEN...")
+                time.sleep(10)
+
+                if not ISDriverOpen:
+                    driver = BbLoginOBJ.driver()
+                    ISDriverOpen = True
+                
                 driver.get(link_for_permission)
 
                 while(True):
@@ -105,12 +109,10 @@ if __name__ == '__main__':
                         time.sleep(1)
                 
                 os.system("taskkill /im Zoom.exe /f")
-                logger.critical("Permission Allowed")
+                driver.minimize_window()
+                logger.critical("Permission Allowed...")
                 break
         
-        
-        driver.minimize_window()
-
 
         # Looping through all Lectures
         for index in range(lecturesToAttend-1,len(allDetails)):
@@ -123,7 +125,7 @@ if __name__ == '__main__':
             currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
             if (currentTime<classJoinTime):
                 nextClassTemp = str(index+1) + ": " + allDetails[index][0] + " " + allDetails[index][1]
-                logger.info("Waiting for class .....")
+                logger.info("Waiting for class...")
                 timeTowait = classJoinTime - currentTime
                 timeTowait = timeTowait.total_seconds()
 
@@ -139,13 +141,17 @@ if __name__ == '__main__':
                     time.sleep(1) 
                     timeTowait -= 1
                 print()
-            
 
-            driver.maximize_window()
 
             IsTimeToJoinClass = BbClassManagementOBJ.compareTime(classJoinTime)
 
-            if IsTimeToJoinClass:   
+            if IsTimeToJoinClass:
+
+                if not ISDriverOpen:
+                    driver = BbLoginOBJ.driver()
+                    ISDriverOpen = True
+                    
+                driver.maximize_window()
 
                 if allDetails[index][2] != "None":
                     zoomlink = allDetails[index][2]
@@ -196,6 +202,8 @@ if __name__ == '__main__':
                     timewaitmins = timewait/60
                     os.system("taskkill /im Zoom.exe /f")
                     logger.info(f"Attended {classJoinName} Lecture for: {timewaitmins} minutes")
+
+
                 else:
 
                     driver.get("https://cuchd.blackboard.com/ultra/course")
@@ -232,7 +240,7 @@ if __name__ == '__main__':
                                 time.sleep(5)
                                 break
                             except:
-                                logger.error(f"Unabale to join class: {classJoinName}. Retrying ...")
+                                logger.error(f"Unabale to join class: {classJoinName}. Retrying...")
                                 is_connected()
                                 
                         joinClassOBJ = JoinOnlineClass(driver.window_handles[-1],driver.window_handles[0],driver,classJoinName,nextClassJoinTime)
@@ -258,12 +266,12 @@ if __name__ == '__main__':
                     # if time to attend lecture is gone and link is not available    
                     elif not IsLinkAvailable[0]:
                         logger.error("Class Joining Link for " + classJoinName + " Lecture Not Found !!!")
+                        driver.minimize_window()
                         classtojoin = False
 
 
             else:
                 logger.critical(f"You missed lecture for: {classJoinName}")
-                driver.minimize_window()
                      
 
         driver.quit()
