@@ -91,7 +91,7 @@ class UimsManagement():
                     driver = webdriver.Chrome(chrome_options=brave_options)
                 except:
                     logger.error("Check if chromedrivers are in the path")
-                    logger.warning("Exiting ..... ")
+                    logger.warning("Exiting...")
                     input()
                     exit()
             
@@ -211,7 +211,7 @@ class UimsManagement():
 
     # filtering data and extracting necessary details
     def loadDetailsFromFIle(self):
-        logger.info("Loading your details ..... ")
+        logger.info("Loading your details...")
         file_path = self.fileName
         Empty = ""
         now = datetime.now()
@@ -249,7 +249,7 @@ class UimsManagement():
                                 all_course_name.append(row)
             except:
                 logger.error(f"Unable to read file: {file_path}")
-                logger.info("Exiting the program .....")
+                logger.info("Exiting the program...")
                 input()
                 exit()
             
@@ -276,7 +276,7 @@ class UimsManagement():
                     file.close()
             except:
                 logger.error(f"Unable to read file: {file_path}")
-                logger.info("Exiting the program .....")
+                logger.info("Exiting the program...")
                 input()
                 exit()
 
@@ -326,7 +326,7 @@ class UimsManagement():
                     write.writerows(new_csv)
             except:
                 logger.error(f"Unable to read file: {file_path}")
-                logger.info("Exiting the program .....")
+                logger.info("Exiting the program...")
                 input()
                 exit()
 
@@ -342,7 +342,7 @@ class UimsManagement():
                             all_course_name.append([row[1], row[2]])
         except:
             logger.error(f"Unable to read file: {file_path}")
-            logger.info("Exiting the program .....")
+            logger.info("Exiting the program...")
             input()
             exit()
         
@@ -365,7 +365,7 @@ class UimsManagement():
                                     to_join.append([row[1].split(" ")[0] + " " + row[1].split(" ")[3], row[3].split(':')[0], row[0]])
         except:
             logger.error(f"Unable to read file: {file_path}")
-            logger.info("Exiting the program .....")
+            logger.info("Exiting the program...")
             input()
             exit()
 
