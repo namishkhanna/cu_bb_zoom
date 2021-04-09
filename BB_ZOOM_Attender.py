@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
         IsLastClass = False
         ISDriverOpen = False
+        
         # finding if there is lab or not
         for index in range(lecturesToAttend-1,len(allDetails)):
         
@@ -114,7 +115,7 @@ if __name__ == '__main__':
                 break
         
 
-        # Looping through all Lectures
+        # looping through all Lectures
         for index in range(lecturesToAttend-1,len(allDetails)):
             
             classJoinTime = BbClassManagementOBJ.joinClassDetails(allDetails[index])
@@ -122,6 +123,7 @@ if __name__ == '__main__':
             nextClassJoinTime = BbClassManagementOBJ.nextClassDetails(allDetails[index])
             total_class_time = 0
 
+            # waiting till class joining time
             currentTime = datetime.strptime(f"{datetime.now().time()}","%H:%M:%S.%f")
             if (currentTime<classJoinTime):
                 nextClassTemp = str(index+1) + ": " + allDetails[index][0] + " " + allDetails[index][1]
@@ -142,7 +144,7 @@ if __name__ == '__main__':
                     timeTowait -= 1
                 print()
 
-
+            # comparing the time
             IsTimeToJoinClass = BbClassManagementOBJ.compareTime(classJoinTime)
 
             if IsTimeToJoinClass:
@@ -152,7 +154,8 @@ if __name__ == '__main__':
                     ISDriverOpen = True
                     
                 driver.maximize_window()
-
+            
+                # zoom class section
                 if allDetails[index][2] != "None":
                     zoomlink = allDetails[index][2]
                     if "Zoom.exe" in (p.name() for p in psutil.process_iter()):
@@ -182,6 +185,7 @@ if __name__ == '__main__':
                     driver.minimize_window()
                     total_time_sleep = 2700
 
+                    # waiting till it complete 45 minutes
                     timewait = 0
                     while(True):
                         timewait += 10
@@ -201,11 +205,11 @@ if __name__ == '__main__':
 
                     timewaitmins = timewait/60
                     os.system("taskkill /im Zoom.exe /f")
-                    logger.info(f"Attended {classJoinName} Lecture for: {timewaitmins} minutes")
+                    logger.warning(f"Attended {classJoinName} Lecture for: {timewaitmins} minutes")
 
 
+                # blackboard class section
                 else:
-
                     driver.get("https://cuchd.blackboard.com/ultra/course")
                     time.sleep(2)
                     currentURL = str(driver.current_url)
@@ -268,7 +272,6 @@ if __name__ == '__main__':
                         logger.error("Class Joining Link for " + classJoinName + " Lecture Not Found !!!")
                         driver.minimize_window()
                         classtojoin = False
-
 
             else:
                 logger.critical(f"You missed lecture for: {classJoinName}")
